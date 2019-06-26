@@ -1,0 +1,107 @@
+ORG 100H
+.CODE
+MAIN PROC
+    CALL SCAN
+    MOV CX,AX      
+    MOV AX,1
+    FACTORIAL:
+    PUSH CX       
+    OR CX,CX
+    JE END
+    MUL CX
+    POP CX
+    LOOP FACTORIAL
+    END:
+    CALL PRINT
+RET
+MAIN ENDP
+NEWLINE PROC   
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    MOV AH,2
+    MOV DL,0AH
+    INT 21H
+    MOV DL,0DH
+    INT 21H  
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+    NEWLINE ENDP
+SCAN PROC
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    BEGIN:
+    XOR BX,BX
+    XOR CX,CX
+    MOV AH,1
+    INT 21H
+    CMP AL,'-'
+    JE NEGATIVE
+    CMP AL,'+'
+    JE POSITIVE
+    JMP REPEAT1
+    NEGATIVE:
+    MOV CX,1
+    POSITIVE:
+    INT 21H  
+    REPEAT1:
+    AND AX,000FH
+    PUSH AX
+    MOV AX,10
+    MUL BX
+    POP BX                  
+    ADD BX,AX
+    MOV AH,1
+    INT 21H
+    CMP AL,0DH
+    JNE REPEAT1
+    MOV AX,BX
+    OR CX,CX
+    JE EXIT
+    NEG AX
+    EXIT:
+    POP DX
+    POP CX
+    POP BX   
+    RET
+    SCAN ENDP
+PRINT PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    OR AX,AX
+    JGE POSITIVE_NUM
+    PUSH AX
+    MOV DL,'-'
+    MOV AH,2
+    INT 21H
+    POP AX
+    NEG AX
+    POSITIVE_NUM:
+    XOR CX,CX
+    MOV BX,10
+    REPEAT2:
+    XOR DX,DX
+    DIV BX
+    PUSH DX
+    INC CX
+    OR AX,AX
+    JNE REPEAT2
+    MOV AH,2
+    PRINT_LOOP:
+    POP DX
+    OR DX,30H
+    INT 21H
+    LOOP PRINT_LOOP
+    POP DX
+    POP CX
+    POP BX
+    POP AX    
+    RET
+    PRINT ENDP
